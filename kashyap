@@ -1,0 +1,336 @@
+'''
+
+Author:Kashyap Narayan
+Last Date: 22Apr2024
+Project: Sacred Ruby Adventure Game
+Enrollment Number: R-2142231551
+'''
+import random
+
+class Player:
+    def __init__(self, name):
+        self.name = name
+        self.inventory = []
+        self.location = "Mumbai"
+        self.level = 1
+        self.xp = 0
+        self.skills = []
+        self.reputation = 0
+        self.morality = 0  # Morality alignment (-100 to 100, where negative values represent evil, positive values represent good, and 0 represents neutral)
+
+    def move(self, new_location):
+        self.location = new_location
+
+    def add_to_inventory(self, item):
+        self.inventory.append(item)
+
+    def gain_xp(self, amount):
+        self.xp += amount
+        print(f"You gained {amount} XP!")
+        if self.xp >= 100 * self.level:
+            self.level_up()
+            
+    def lose_xp(self, amount):
+        if self.player.xp >= amount:
+            self.player.xp -= amount
+            print(f"You lost {amount} XP.")
+        else:
+            print("You don't have enough XP to lose.")
+
+
+    def level_up(self):
+        self.level += 1
+        print(f"Congratulations! You've reached level {self.level}. Choose a new skill:")
+        print("1. Stealth")
+        print("2. Strength")
+        print("3. Intelligence")
+        choice = input("Enter your choice: ")
+        if choice == "1":
+            self.skills.append("Stealth")
+            print("You've learned the skill: Stealth!")
+        elif choice == "2":
+            self.skills.append("Strength")
+            print("You've learned the skill: Strength!")
+        elif choice == "3":
+            self.skills.append("Intelligence")
+            print("You've learned the skill: Intelligence!")
+
+    def adjust_reputation(self, amount):
+        self.reputation += amount
+        print(f"Your reputation has changed by {amount}.")
+
+    def adjust_morality(self, amount):
+        self.morality += amount
+        print(f"Your morality alignment has changed by {amount}.")
+
+class Game:
+    def __init__(self):
+        self.player = None
+        self.locations = {
+            "Mumbai": {
+                "description": "You are in the bustling streets of Mumbai, surrounded by colorful markets and busy alleys.",
+                "options": ["Talk to locals", "Explore markets", "Visit a temple"]
+            },
+            "Western Ghats": {
+                "description": "You've entered the dense jungles of Western Ghats, teeming with wildlife and ancient mysteries.",
+                "options": ["Follow a guide", "Strike out on your own", "Rest and observe surroundings", "Explore Hidden Cave", "Travel to Treacherous Mountain Pass"]
+            },
+            "Hidden Cave": {
+                "description": "You stumble upon a hidden cave concealed within the jungle, its entrance obscured by foliage.",
+                "options": ["Enter the cave", "Investigate the surroundings", "Proceed cautiously"]
+            },
+            "Sacred Temple": {
+                "description": "You stand before the entrance of the Sacred Temple, rumored to house the Sacred Ruby.",
+                "options": ["Enter the temple", "Study the temple exterior", "Seek advice from a sage", "Travel to Serene Village"]
+            },
+            "Serene Village": {
+                "description": "You arrive at a serene village nestled amidst the mountains, where the villagers greet you warmly.",
+                "options": ["Interact with villagers", "Explore the village", "Rest and rejuvenate"]
+            },
+            "Treacherous Mountain Pass": {
+                "description": "You find yourself at the entrance of a treacherous mountain pass, where danger lurks at every turn.",
+                "options": ["Brave the mountain pass", "Search for alternative routes", "Consult a local guide"]
+            }
+        }
+        self.game_active = True
+
+    def start_game(self):
+        print("Welcome to the Sacred Ruby Adventure Game!")
+        player_name = input("Enter your name: ")
+        self.player = Player(player_name)
+        self.run_game()
+
+    def run_game(self):
+        while self.game_active:
+            self.display_location()
+
+    def display_location(self):
+        current_location = self.locations[self.player.location]
+        print("\n" + "=" * 50)
+        print("Location:", self.player.location)
+        print(current_location["description"])
+        print("What would you like to do?")
+        for i, option in enumerate(current_location["options"], 1):
+            print(f"{i}. {option}")
+        choice = int(input("Enter your choice (or enter 0 to exit): "))
+        if choice == 0:
+            self.game_active = False
+        else:
+            self.handle_choice(choice)
+            
+        if self.player.location.startswith("Final Challenge"):
+                if self.player.location == "Final Challenge: Mountain Pass Ending":
+                    self.resolve_mountain_pass()
+                elif self.player.location == "Final Challenge: Sacred Temple Ending":
+                    self.resolve_sacred_temple()
+                elif self.player.location == "Final Challenge: Serene Village Ending":
+                    self.resolve_serene_village()
+                
+
+    def handle_choice(self, choice):
+        current_location = self.locations.get(self.player.location)
+        if current_location is None:
+            print("Location not found.")
+            return
+
+        selected_option = current_location["options"][choice - 1] if 0 < choice <= len(current_location["options"]) else None
+        if selected_option is None:
+            print("Invalid option. Please choose a valid option.")
+            return
+
+        if self.player.location == "Mumbai":
+            if selected_option == "Talk to locals":
+                print("You talk to locals but gain no useful information.")
+                self.player.adjust_reputation(5)  # Reputation increases slightly
+                self.player.gain_xp(10)
+            elif selected_option == "Explore markets":
+                print("You search through the markets but find nothing of significance.")
+                self.player.adjust_reputation(-3)  # Reputation decreases slightly
+                self.player.adjust_morality(5)  # Morality increases slightly
+            elif selected_option == "Visit a temple":
+                print("You visit a nearby temple and receive a cryptic clue about the Sacred Ruby.")
+                self.player.gain_xp(20)
+                self.player.move("Western Ghats")
+
+        elif self.player.location == "Western Ghats":
+            if selected_option == "Follow a guide":
+                print("You decide to follow a local guide through the jungle.")
+                self.player.gain_xp(20)
+            elif selected_option == "Strike out on your own":
+                print("You choose to venture into the jungle alone, navigating by your instincts.")
+                self.player.gain_xp(30)
+            elif selected_option == "Rest and observe surroundings":
+                print("You take a moment to rest and observe your surroundings, gaining valuable insights.")
+                self.player.gain_xp(15)
+            elif selected_option == "Explore Hidden Cave":
+                print("You decide to explore the Hidden Cave.")
+                self.player.move("Hidden Cave")
+            elif selected_option == "Travel to Treacherous Mountain Pass":
+                print("You decide to travel to the Treacherous Mountain Pass.")
+                self.player.move("Final Challenge: Mountain Pass Ending")
+
+        elif self.player.location == "Hidden Cave":
+            if selected_option == "Enter the cave":
+                print("You cautiously enter the dark cave, unsure of what you might find inside.")
+                self.player.gain_xp(20)
+                self.player.move("Sacred Temple")
+            elif selected_option == "Investigate the surroundings":
+                print("You carefully inspect the area surrounding the cave, noticing signs of recent activity.")
+                self.player.gain_xp(15)
+            elif selected_option == "Proceed cautiously":
+                print("You proceed into the cave with caution, keeping your senses sharp for any danger.")
+                self.player.gain_xp(20)
+
+        elif self.player.location == "Sacred Temple":
+            if selected_option == "Enter the temple":
+                print("You enter the Sacred Temple.")
+                self.player.gain_xp(10)
+            elif selected_option == "Study the temple exterior":
+                print("You carefully study the intricate designs of the temple exterior, noticing hidden symbols.")
+                self.player.gain_xp(20)
+            elif selected_option == "Seek advice from a sage":
+                print("You seek guidance from a wise sage, who offers cryptic advice for the challenges ahead.")
+                self.player.gain_xp(25)
+            elif selected_option == "Travel to Serene Village":
+                print("You decide to travel to the Serene Village.")
+                self.player.move("Final Challenge: Serene Village Ending")
+            elif selected_option == "Travel to Treacherous Mountain Pass":
+                print("You decide to travel to the Treacherous Mountain Pass.")
+                self.player.move("Final Challenge: Mountain Pass Ending")
+
+        elif self.player.location == "Serene Village":
+            if selected_option == "Interact with villagers":
+                print("You engage in conversation with the villagers, learning about their way of life.")
+                self.player.gain_xp(15)
+            elif selected_option == "Explore the village":
+                print("You explore the various buildings and landmarks in the village, discovering hidden gems.")
+                self.player.gain_xp(20)
+                self.player.move("Final Challenge: Serene Village Ending")
+                
+            elif selected_option == "Rest and rejuvenate":
+                print("You take some time to rest and rejuvenate, enjoying the peaceful atmosphere of the village.")
+                self.player.gain_xp(10)
+            elif selected_option == "Travel to Sacred Temple":
+                print("You decide to travel to the Sacred Temple.")
+                self.player.move("Final Challenge: Sacred Temple Ending")
+
+        elif self.player.location == "Treacherous Mountain Pass":
+            if selected_option == "Brave the mountain pass":
+                print("You muster your courage and proceed through the treacherous mountain pass.")
+                self.player.gain_xp(25)
+            elif selected_option == "Search for alternative routes":
+                print("You search for alternative routes, hoping to find a safer path through the mountains.")
+                self.player.gain_xp(20)
+            elif selected_option == "Consult a local guide":
+                print("You seek the guidance of a seasoned mountain guide, who shares valuable insights.")
+                self.player.gain_xp(30)
+                self.player.move("Final Challenge: Mountain Pass Ending")
+            elif selected_option == "Travel to Sacred Temple":
+                print("You decide to travel to the Sacred Temple.")
+                self.player.move("Final Challenge: Sacred Temple Ending")
+
+
+
+    def resolve_final_challenge(self):
+        print("You confront the guardian, a mighty serpent!")
+        serpent_strength = 8  # Strength of the serpent
+        player_strength = random.randint(5, 10) + self.player.level  # Player's strength (increased by level)
+        player_intelligence = random.randint(5, 10) + self.player.level  # Player's intelligence (increased by level)
+
+        print(f"Your strength: {player_strength}")
+        print(f"Serpent's strength: {serpent_strength}")
+
+        if player_strength > serpent_strength:
+            print("You overpower the serpent with your strength and claim the Sacred Ruby!")
+            self.player.adjust_reputation(10)  # Reputation increases significantly
+            self.end_game("victory")
+        elif player_intelligence > serpent_strength:
+            print("You outsmart the serpent with your intelligence and sneakily grab the Sacred Ruby!")
+            self.player.adjust_reputation(5)  # Reputation increases moderately
+            self.end_game("victory")
+        else:
+            print("The serpent proves too powerful for you. You must retreat for now.")
+            print("However, you manage to learn a weakness for the serpent, giving you hope for the future.")
+            self.player.adjust_reputation(-10)  # Reputation decreases significantly
+            self.end_game("defeat")
+            
+    def resolve_sacred_temple(self):
+        print("You confront the guardian, a mighty serpent, deep within the Sacred Temple!")
+        serpent_strength = 10  # Strength of the serpent
+        player_strength = random.randint(6, 12) + self.player.level  # Player's strength (increased by level)
+        player_intelligence = random.randint(7, 13) + self.player.level  # Player's intelligence (increased by level)
+
+        print(f"Your strength: {player_strength}")
+        print(f"Serpent's strength: {serpent_strength}")
+
+        if player_strength > serpent_strength:
+            print("You bravely engage the serpent in combat and emerge victorious, claiming the Sacred Ruby!")
+            self.player.adjust_reputation(10)  # Reputation increases significantly
+            self.end_game("victory")
+        elif player_intelligence > serpent_strength:
+            print("You use your intelligence to outwit the serpent and seize the Sacred Ruby!")
+            self.player.adjust_reputation(5)  # Reputation increases moderately
+            self.end_game("victory")
+        else:
+            print("Despite your efforts, the serpent proves too powerful. You retreat, but not empty-handed.")
+            print("You uncover a hidden passage leading to an ancient artifact, a valuable discovery for your village.")
+            self.player.adjust_reputation(-5)  # Reputation decreases slightly
+            self.end_game("defeat")
+
+    def resolve_serene_village(self):
+        print("In the heart of the serene village, you face the guardian serpent, determined to protect the Sacred Ruby.")
+        serpent_strength = 9  # Strength of the serpent
+        player_strength = random.randint(5, 11) + self.player.level  # Player's strength (increased by level)
+        player_charisma = random.randint(6, 12) + self.player.level  # Player's charisma (increased by level)
+
+        print(f"Your strength: {player_strength}")
+        print(f"Serpent's strength: {serpent_strength}")
+
+        if player_strength > serpent_strength:
+            print("You engage the serpent with courage and might, overpowering it to claim the Sacred Ruby!")
+            self.player.adjust_reputation(10)  # Reputation increases significantly
+            self.end_game("victory")
+        elif player_charisma > serpent_strength:
+            print("With your charismatic charm, you manage to pacify the serpent and peacefully take the Sacred Ruby!")
+            self.player.adjust_reputation(7)  # Reputation increases moderately
+            self.end_game("victory")
+        else:
+            print("Despite your best efforts, you fail to overcome the serpent's might. It's a bitter defeat.")
+            print("However, the villagers rally around you, grateful for your bravery, and offer their support.")
+            self.player.adjust_reputation(-5)  # Reputation decreases slightly
+            self.end_game("defeat")
+            
+    def resolve_mountain_pass(self):
+        print("You confront the guardian, a mighty serpent!")
+        serpent_strength = 8  # Strength of the serpent
+        player_strength = random.randint(5, 10) + self.player.level  # Player's strength (increased by level)
+        player_intelligence = random.randint(5, 10) + self.player.level  # Player's intelligence (increased by level)
+
+        print(f"Your strength: {player_strength}")
+        print(f"Serpent's strength: {serpent_strength}")
+
+        if player_strength > serpent_strength:
+            print("You overpower the serpent with your strength and claim the Sacred Ruby!")
+            self.player.adjust_reputation(10)  # Reputation increases significantly
+            self.end_game("victory")
+        elif player_intelligence > serpent_strength:
+            print("You outsmart the serpent with your intelligence and sneakily grab the Sacred Ruby!")
+            self.player.adjust_reputation(5)  # Reputation increases moderately
+            self.end_game("victory")
+        else:
+            print("The serpent proves too powerful for you. You must retreat for now.")
+            print("However, you manage to learn a weakness for the serpent, giving you hope for the future.")
+            self.player.adjust_reputation(-10)  # Reputation decreases significantly
+            self.end_game("defeat")
+
+    def end_game(self, ending):
+        if ending == "victory":
+            print(f"Congratulations, {self.player.name}! You've obtained the Sacred Ruby and brought prosperity to your village.")
+        elif ending == "defeat":
+            print("Though you were unable to claim the Sacred Ruby this time, your journey has not ended. There are still more adventures awaiting you!")
+        self.game_active = False
+
+
+
+game = Game()
+game.start_game()
